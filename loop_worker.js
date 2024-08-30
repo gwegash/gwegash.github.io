@@ -1,1 +1,54 @@
-(()=>{function f(n,e){return(n%e+e)%e}var l=class extends AudioWorkletProcessor{buffer;loopTime_s;newBuffer(){this.buffer=new Float32Array(this.loopTime_s*sampleRate),console.log("resizing buffer to!",this.buffer.length)}constructor(e){super(),this.loopTime_s=e.processorOptions.loopTime_s,this.newBuffer(),this.port.onmessage=r=>{r.data.loopTime_s!==this.loopTime_s&&(this.loopTime_s=r.data.loopTime_s,this.newBuffer())}}static get parameterDescriptors(){return[{name:"latency",defaultValue:30,minValue:1,maxValue:500,automationRate:"k-rate"}]}process(e,r,a){let s=r[0],u=e[0];for(let o=0;o<s.length;o++)for(let t=0;t<s[0].length;t++){for(let i=0;i<u.length;i++)this.buffer[f(t+currentFrame,this.buffer.length)]=this.buffer[f(t+currentFrame,this.buffer.length)]+u[i][t];s[o][t]=this.buffer[f(t+currentFrame+Math.floor(a.latency[0]*sampleRate/1e3),this.buffer.length)]}return!0}};registerProcessor("loop-processor",l);})();
+(() => {
+  // ui/worklets/loop_worker.js
+  function mod_wrap(i, i_max) {
+    return (i % i_max + i_max) % i_max;
+  }
+  var LoopProcessor = class extends AudioWorkletProcessor {
+    buffer;
+    loopTime_s;
+    newBuffer() {
+      this.buffer = new Float32Array(this.loopTime_s * sampleRate);
+      console.log("resizing buffer to!", this.buffer.length);
+    }
+    constructor(options) {
+      super();
+      this.loopTime_s = options.processorOptions.loopTime_s;
+      this.newBuffer();
+      this.port.onmessage = (e) => {
+        if (e.data.loopTime_s !== this.loopTime_s) {
+          this.loopTime_s = e.data.loopTime_s;
+          this.newBuffer();
+        }
+      };
+    }
+    static get parameterDescriptors() {
+      return [
+        {
+          name: "latency",
+          defaultValue: 30,
+          minValue: 1,
+          maxValue: 500,
+          automationRate: "k-rate"
+        }
+      ];
+    }
+    process(inputs, outputs, parameters) {
+      const output = outputs[0];
+      const input = inputs[0];
+      for (let o = 0; o < output.length; o++) {
+        for (let s = 0; s < output[0].length; s++) {
+          for (let i = 0; i < input.length; i++) {
+            this.buffer[mod_wrap(s + currentFrame, this.buffer.length)] = this.buffer[mod_wrap(s + currentFrame, this.buffer.length)] + input[i][s];
+          }
+          output[o][s] = this.buffer[mod_wrap(
+            s + currentFrame + Math.floor(parameters.latency[0] * sampleRate / 1e3),
+            this.buffer.length
+          )];
+        }
+      }
+      return true;
+    }
+  };
+  registerProcessor("loop-processor", LoopProcessor);
+})();
+//# sourceMappingURL=loop_worker.js.map
