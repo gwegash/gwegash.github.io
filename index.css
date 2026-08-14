@@ -258,6 +258,22 @@ table {
 .select {
   appearance: none;
 }
+.midi-select,
+.midi-button {
+  color: white;
+  background: black;
+  font-family: "ibmvga";
+  border: solid 1px gray;
+  max-width: 130px;
+  margin: 1px;
+}
+.midi-button.running {
+  color: black;
+  background: white;
+}
+.midi-button:disabled {
+  color: gray;
+}
 .settings-keybindings {
   color: white;
   background: black;
@@ -314,6 +330,9 @@ a:visited {
   margin: 1em;
   border-top: 1px solid white;
   width: 22rem;
+}
+.sf2-programs {
+  overflow-y: scroll;
 }
 .intro-clicked {
   display: none;
